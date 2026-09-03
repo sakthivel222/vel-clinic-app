@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: vel-clinic-api
+    env: node
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vel-clinic-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 5000
+      - key: FRONTEND_URL
+        value: https://vel-clinic-app.vercel.app
+
+databases:
+  - name: vel-clinic-db
+    plan: free

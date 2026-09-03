@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN") // ADMIN, STAFF
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id               String   @id @default(uuid())
+  registrationNumber String? @unique
+  fullName         String
+  dateOfBirth      DateTime?
+  gender           String?
+  phone            String?
+  email            String?
+  address          String?
+  chiefComplaint   String?
+  diagnosis        String?
+  medicalHistory   String?
+  status           String   @default("ACTIVE") // ACTIVE, COMPLETED, ON_HOLD, DISCHARGED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  appointments     Appointment[]
+  sessions         Session[]
+  payments         Payment[]
+  packages         Package[]
+  tasks            Task[]
+  exercisePrograms ExerciseAssignment[]
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  patientId       String
+  date            DateTime
+  startTime       String
+  endTime         String
+  type            String   // CLINIC, HOME_VISIT
+  status          String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  session         Session?
+}
+
+model Session {
+  id              String   @id @default(uuid())
+  patientId       String
+  appointmentId   String?  @unique
+  date            DateTime
+  subjective      String?
+  objective       String?
+  assessment      String?
+  plan            String?
+  treatmentGiven  String?
+  painBefore      Int?
+  painAfter       Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  appointment     Appointment? @relation(fields: [appointmentId], references: [id])
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  patientId       String
+  amount          Float
+  method          String   // CASH, UPI, CARD
+  status          String   @default("PAID") // PAID, PENDING
+  type            String   // SINGLE_SESSION, PACKAGE
+  date            DateTime @default(now())
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Package {
+  id              String   @id @default(uuid())
+  patientId       String
+  totalSessions   Int
+  usedSessions    Int      @default(0)
+  amountPaid      Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Exercise {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  targetBodyPart  String?
+  instructions    String?
+  imageUrl        String?
+  videoUrl        String?
+  defaultSets     Int      @default(3)
+  defaultReps     Int      @default(10)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  assignments     ExerciseAssignment[]
+}
+
+model ExerciseAssignment {
+  id              String   @id @default(uuid())
+  patientId       String
+  exerciseId      String
+  sets            Int
+  reps            Int
+  frequency       String?  // e.g. "Daily", "3x per week"
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  exercise        Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model Task {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  assignedTo      String?  // staff/user ID
+  patientId       String?
+  dueDate         DateTime?
+  priority        String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  status          String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, OVERDUE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patient         Patient? @relation(fields: [patientId], references: [id])
+}
