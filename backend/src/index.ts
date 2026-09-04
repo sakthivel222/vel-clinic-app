@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://vel-clinic-app.vercel.app',
+    'https://vel-clinic-frontend.vercel.app',
     process.env.FRONTEND_URL || ''
   ].filter(Boolean),
   credentials: true
