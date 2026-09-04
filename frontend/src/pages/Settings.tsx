@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Bell, Shield, Smartphone, Building, Users } from 'lucide-react';
+import { Bell, Shield, Building, Users } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('clinic');
